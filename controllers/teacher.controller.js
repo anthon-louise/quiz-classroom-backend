@@ -85,7 +85,7 @@ const teacherLogin = async (req, res) => {
 // Get teachet information
 const getTeacherProfile = async (req, res) => {
     const {teacherId} = req.user
-    const teacherProfile = await Teacher.findById(teacherId).select('name email')
+    const teacherProfile = await Teacher.findById(teacherId).select('name email role')
     res.json({teacherProfile, message: 'Teacher profile fetched'})
 }
 

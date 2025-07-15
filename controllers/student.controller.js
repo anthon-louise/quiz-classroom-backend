@@ -18,6 +18,13 @@ const studentLoginBodySchema = Joi.object({
     password: Joi.string().min(1).required()
 })
 
+// Student update body schema validation
+const studentUpdateBodySchema = Joi.object({
+    email: Joi.string().email().required(),
+    name: Joi.string().required().min(1)
+})
+
+
 // Student controllers:
 
 // signup for students
@@ -77,8 +84,50 @@ const studentLogin = async (req, res) => {
     res.json({message: 'Student login success'})
 }
 
+// Get student information
+const getStudentProfile = async (req, res) => {
+    const {studentId} = req.user
+
+    const studentProfile = await Student.findById(studentId).select('name email role')
+    res.json({studentProfile, message: 'Student profile fetched'})
+}
+
+// Update student profile
+const updateStudentProfile = async (req, res) => {
+    const {studentId} = req.user
+
+    const {error, value} = studentUpdateBodySchema.validate(req.body)
+    if (error) {
+        return res.status(400).json({message: error.details[0].message})
+    }
+
+    const {email, name} = value
+
+    const existingStudent = await Student.findOne({email})
+    if (existingStudent && existingStudent._id.toString() !== studentId) {
+        return res.status(400).json({message: 'Email already exists'})
+    }
+
+    const student = await Student.findByIdAndUpdate(
+        studentId,
+        {email, name},
+        {new: true, runValidators: true}
+    )
+
+    res.json(student)
+}
+
+// Delete student account
+const deleteStudentAccount = async (req, res) => {
+    const {studentId} = req.user
+    await Student.findByIdAndDelete(studentId)
+    res.json({message: 'Account deleted'})
+}
 
 module.exports = {
     studentSignup,
-    studentLogin
+    studentLogin,
+    getStudentProfile,
+    updateStudentProfile,
+    deleteStudentAccount
 }
