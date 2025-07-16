@@ -8,7 +8,7 @@ module.exports = (req, res, next) => {
 
     const {error} = idSchema.validate(req.params)
     if (error) {
-        return res.status(400).json({message: error.details[0].message})
+        return res.status(400).json({message: error.details[0].message, lol: 'dd'})
     }
 
     next()
