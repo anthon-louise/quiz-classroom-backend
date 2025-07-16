@@ -15,4 +15,10 @@ router.get('/', auth, subjectControllers.getAllSubjects)
 // getting a subject for a teacher
 router.get('/:id', validateId, auth, subjectControllers.getSubject)
 
+// deleting a subject for a teacher
+router.delete('/:id', validateId, auth, subjectControllers.deleteSubject)
+
+// updating a subject for a teacher
+router.put('/:id', validateId, auth, subjectControllers.updateSubject)
+
 module.exports = router

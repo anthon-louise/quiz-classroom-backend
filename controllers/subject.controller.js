@@ -48,12 +48,51 @@ const getAllSubjects = async (req, res) => {
 
 // Get a subject of a teacher
 const getSubject = async (req, res) => {
-    const {subjectId} = req.params
+    const subjectId = req.params.id
     const {teacherId} = req.user
 
-    const subject = await Subject.findOne({subjectId, teacherId})
+    const subject = await Subject.findOne({_id: subjectId, teacherId})
     if (!subject) {
         return res.status(404).json({message: 'Subject not found'})
+    }
+    res.json(subject)
+}
+
+// delete a subject of a teacher
+const deleteSubject = async (req, res) => {
+    const {teacherId} = req.user
+    const subjectId = req.params.id
+
+    const subject = await Subject.findOne({teacherId, _id: subjectId})
+    if (!subject) {
+        return res.status(404).json({message: 'No subject found'})
+    }
+
+    await subject.deleteOne()
+    res.json({message: 'Subject deleted successfully'})
+}
+
+// update a subject for a teacher
+const updateSubject = async (req, res) => {
+    const {teacherId} = req.user
+    const subjectId = req.params.id
+
+    const {error, value} = createUpdateSubjectBodySchema.validate(req.body)
+    if (error) {
+        return res.status(400).json({message: error.details[0].message})
+    }
+
+    const {title} = value
+
+    console.log(subjectId)
+
+    const subject = await Subject.findByOneAndUpdate(
+        {teacherId, _id: subjectId},
+        {title},
+        {new: true, runValidators: true}
+    )
+    if (!subject) {
+        return res.status(400).json({message: 'No subject found'})
     }
     res.json(subject)
 }
@@ -61,5 +100,7 @@ const getSubject = async (req, res) => {
 module.exports = {
     createSubject,
     getAllSubjects,
-    getSubject
+    getSubject,
+    deleteSubject,
+    updateSubject
 }
